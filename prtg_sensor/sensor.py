@@ -2,77 +2,68 @@ from typing import Union
 
 
 class Sensor:
-
     def __init__(self):
         self._channels = list()
-        self.text = 'OK'
+        self.text = "OK"
 
-        self._POSSIBLE_SIZES = ('one', 'kilo', 'mega', 'giga', 'tera', 'byte',
-                                'kilobyte', 'megabyte', 'gigabyte', 'terabyte',
-                                'bit', 'kilobit', 'megabit', 'gigabit',
-                                'terabit')
+        self._POSSIBLE_SIZES = (
+            "one",
+            "kilo",
+            "mega",
+            "giga",
+            "tera",
+            "byte",
+            "kilobyte",
+            "megabyte",
+            "gigabyte",
+            "terabyte",
+            "bit",
+            "kilobit",
+            "megabit",
+            "gigabit",
+            "terabit",
+        )
 
         self._CONTENT = {
-            'unit': {
-                'name':
-                'Unit',
-                'values':
-                ('custom', 'count', 'cpu', 'bytesfile', 'speeddisk',
-                 'speednet', 'timehours', 'timeseconds', 'timeresponse',
-                 'percent', 'temperature', 'bytesdisk', 'bytesbandwidth'),
+            "unit": {
+                "name": "Unit",
+                "values": (
+                    "custom",
+                    "count",
+                    "cpu",
+                    "bytesfile",
+                    "speeddisk",
+                    "speednet",
+                    "timehours",
+                    "timeseconds",
+                    "timeresponse",
+                    "percent",
+                    "temperature",
+                    "bytesdisk",
+                    "bytesbandwidth",
+                ),
             },
-            'speed_size': {
-                'name': 'SpeedSize',
-                'values': self._POSSIBLE_SIZES
-            },
-            'volume_size': {
-                'name': 'VolumeSize',
-                'values': self._POSSIBLE_SIZES
-            },
-            'speed_time': {
-                'name': 'SpeedTime',
-                'values': ('second', 'minute', 'hour', 'day')
-            },
-            'mode': {
-                'name': 'Mode',
-                'values': ('absolute', 'difference')
-            },
-            'float': {
-                'name': 'Float',
-                'values': (0, 1)
-            },
-            'decimal_mode': {
-                'name': 'DecimalMode',
-                'values': ('auto', 'all')
-            },
-            'warning': {
-                'name': 'Warning',
-                'values': (0, 1)
-            },
-            'show_chart': {
-                'name': 'ShowChart',
-                'values': (0, 1)
-            },
-            'show_table': {
-                'name': 'ShowTable',
-                'values': (0, 1)
-            },
-            'limit_mode': {
-                'name': 'LimitMode',
-                'values': (0, 1)
-            },
-            'custom_unit': 'CustomUnit',
-            'limit_max_error': 'LimitMaxError',
-            'limit_min_error': 'LimitMinError',
-            'limit_max_warning': 'LimitMaxWarning',
-            'limit_min_warning': 'LimitMinWarning',
-            'limit_error_msg': 'LimitErrorMsg',
-            'limit_warning_msg': 'LimitWarningMsg',
-            'value_lookup': 'ValueLookup',
+            "speed_size": {"name": "SpeedSize", "values": self._POSSIBLE_SIZES},
+            "volume_size": {"name": "VolumeSize", "values": self._POSSIBLE_SIZES},
+            "speed_time": {"name": "SpeedTime", "values": ("second", "minute", "hour", "day")},
+            "mode": {"name": "Mode", "values": ("absolute", "difference")},
+            "float": {"name": "Float", "values": (0, 1)},
+            "decimal_mode": {"name": "DecimalMode", "values": ("auto", "all")},
+            "warning": {"name": "Warning", "values": (0, 1)},
+            "show_chart": {"name": "ShowChart", "values": (0, 1)},
+            "show_table": {"name": "ShowTable", "values": (0, 1)},
+            "limit_mode": {"name": "LimitMode", "values": (0, 1)},
+            "custom_unit": "CustomUnit",
+            "limit_max_error": "LimitMaxError",
+            "limit_min_error": "LimitMinError",
+            "limit_max_warning": "LimitMaxWarning",
+            "limit_min_warning": "LimitMinWarning",
+            "limit_error_msg": "LimitErrorMsg",
+            "limit_warning_msg": "LimitWarningMsg",
+            "value_lookup": "ValueLookup",
         }
 
-    def add_channel(self, name: str, value: Union[int, float],
-                    **kwargs) -> None:
+    def add_channel(self, name: str, value: Union[int, float, str], **kwargs) -> None:
         """
         This adds a channel to the sensor object
 
@@ -80,7 +71,7 @@ class Sensor:
             ----------
             ``name : str``
                 Name of the channel as displayed in user interfaces
-            ``value : int | float``
+            ``value : int | float | str``
                 The value as integer or float
             ``unit : str``
                 The unit of the value. This is useful for PRTG to convert volumes and times
@@ -120,38 +111,59 @@ class Sensor:
                 Define if you want to use a lookup file. Enter the ID of the lookup file that you want to use
         """
         if len(self._channels) > 49:
-            raise IndexError('You can define only 50 channels per each sensor')
+            raise IndexError("You can define only 50 channels per each sensor")
 
-        channel = {'Channel': name}
+        channel = {"Channel": name}
         for k, v in kwargs.items():
             content = self._CONTENT[k]
             if isinstance(content, dict):
-                if (v.lower()
-                        if isinstance(v, str) else v) in content['values']:
-                    channel[content['name']] = v
+                if (v.lower() if isinstance(v, str) else v) in content["values"]:
+                    channel[content["name"]] = v
                 else:
-                    raise ValueError('The %s value can not be used' % k)
+                    raise ValueError("The %s value can not be used" % k)
             else:
                 channel[content] = v
 
-        if channel.get('Unit') == 'Custom' and not channel.get('CustomUnit'):
-            raise ValueError('You must to set short custom_unit')
+        if channel.get("Unit") == "Custom" and not channel.get("CustomUnit"):
+            raise ValueError("You must to set short custom_unit")
 
-        channel['Value'] = '%f' % value if channel.get(
-            'Float') == 1 else '%d' % value
+        channel["Value"] = "%f" % float(value) if channel.get("Float") else "%d" % int(float(value))
 
         self._channels.append(channel)
 
-    def get_result(self) -> dict:
+    def get_result(self, text: str = None) -> dict:
         """
         Return result with channels and text.
-        
+
         Returns
         ----------
             ``result``
                 Dict of result data for prtg
         """
-        return {'prtg': {'result': self._channels, 'text': self.text}}
+        if not text:
+            text = self.text
+        return {"prtg": {"result": self._channels, "text": text}}
+
+    def get_ok(self, text: str = None) -> dict:
+        """
+        Return fast ok result with text.
+
+        Parameters:
+        ----------
+            ``text : str``
+                Text message. The default is text of sensor (OK)
+
+        Returns
+        ----------
+            ``result``
+                Dict of result data for prtg
+
+        """
+        if not text:
+            text = self.text
+        if not self._channels:
+            self.add_channel("ok", 1)
+        return {"prtg": {"result": self._channels, "error": 0, "text": text}}
 
     def get_error_result(self, text: str = None) -> dict:
         """
@@ -170,4 +182,4 @@ class Sensor:
         """
         if not text:
             text = self.text
-        return {'prtg': {'error': 1, 'text': text}}
+        return {"prtg": {"error": 1, "text": text}}
